@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APS22 M01 · Amostra visual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Roboto+Slab:wght@500;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Identidade Apsen institucional. */
+:root{
+  --royal:#0B13B6; --marinho:#08094D; --noite:#05063A; --vivo:#015DD6; --ciano:#01F8FF; --celeste:#8FB7FF;
+  --gelo:#E9EEFF; --gelo2:#F4F6FF; --linha:#D3DBF5; --texto:#1C1E3A; --suave:#4F557A;
+  --ok:#0E8A5F; --ok-bg:#E3F6EE; --erro:#C2264B; --erro-bg:#FCE9EE; --ouro:#FFC23D;
+  --t:"Roboto Slab",Georgia,serif; --c:"Barlow Condensed",sans-serif;
+  --sombra:0 18px 40px -22px rgba(8,9,77,.45); --sombra2:0 30px 60px -30px rgba(5,6,58,.6);
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font:400 18px/1.6 Roboto,system-ui,sans-serif;color:var(--texto);background:var(--gelo2);overflow-x:hidden}
+img{max-width:100%;display:block}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--ciano);outline-offset:3px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+.tit{font-family:var(--t);font-weight:800;color:var(--marinho);font-size:clamp(30px,4vw,46px);line-height:1.1;letter-spacing:-.3px}
+.sub{font:700 15px var(--c);letter-spacing:2.5px;text-transform:uppercase;color:var(--vivo);display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sub::before{content:"";width:34px;height:3px;border-radius:3px;background:var(--ciano)}
+.lead{font-size:19px;color:var(--suave)}
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
+.rv.vis{opacity:1;transform:none}
+.claro .tit{color:#fff}.claro .lead{color:#d3d7ff}.claro .sub{color:var(--ciano)}
+/* fundo com estrelas e pontos (motivo da marca) */
+.pontilhado{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1.5px,transparent 1.6px);background-size:26px 26px;pointer-events:none}
+.pontilhado.esc{background-image:radial-gradient(rgba(11,19,182,.08) 1.5px,transparent 1.6px)}
+.estrela{position:absolute;color:var(--ciano);opacity:.85;animation:flutua 6s ease-in-out infinite;pointer-events:none}
+.estrela svg{width:100%;height:100%}
+@keyframes flutua{50%{transform:translateY(-14px) rotate(14deg)}}
+.onda-base{position:absolute;left:0;bottom:-1px;width:100%;height:100px;pointer-events:none;z-index:1}
+
+/* Barra superior */
+.topo{position:fixed;inset:0 0 auto 0;height:64px;z-index:50;background:rgba(5,6,58,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:0 6px 24px -12px rgba(0,0,0,.6)}
+.logo{background:#fff;border-radius:10px;padding:4px 10px;display:flex}
+.logo img{height:34px;width:auto}
+.topo .amostra{font:600 13px var(--c);letter-spacing:1.5px;text-transform:uppercase;color:#9fa6ff;margin-left:14px}
+.topo .dir{display:flex;align-items:center;gap:14px}
+.mini-prog{display:flex;align-items:center;gap:8px;font:700 15px var(--c);letter-spacing:1px;color:#cfd3ff;text-transform:uppercase}
+.mini-prog .b{display:flex;gap:4px}.mini-prog .b i{width:18px;height:6px;border-radius:4px;background:#2b2f88}.mini-prog .b i.on{background:var(--ciano)}
+.btn-mapa{display:flex;align-items:center;gap:10px;background:var(--ciano);color:var(--marinho);font:700 17px var(--c);letter-spacing:.5px;text-transform:uppercase;padding:9px 18px 9px 12px;border-radius:40px;transition:.2s}
+.btn-mapa:hover{background:#fff}
+.btn-mapa svg{width:22px;height:22px}
+.progresso{position:fixed;top:64px;left:0;height:4px;background:linear-gradient(90deg,var(--ciano),var(--vivo));width:0;z-index:51;border-radius:0 4px 4px 0}
+
+/* Gaveta */
+.veu{position:fixed;inset:0;background:rgba(5,6,58,.55);backdrop-filter:blur(3px);z-index:60;opacity:0;pointer-events:none;transition:.3s}
+.veu.on{opacity:1;pointer-events:auto}
+.gaveta{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--gelo2);z-index:61;transform:translateX(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.gaveta.on{transform:none}
+.gaveta header{background:var(--royal);color:#fff;padding:26px 26px 60px;position:relative;overflow:hidden}
+.gaveta header h3{font:800 28px var(--t)}
+.gaveta header p{color:#cfd3ff;font-size:15px}
+.gaveta header .onda{position:absolute;left:0;bottom:-1px;width:100%;height:46px}
+.gaveta .fechar{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:22px}
+.gaveta .lista{padding:6px 22px 22px;overflow:auto;flex:1}
+.g-item{display:flex;gap:14px;align-items:center;width:100%;text-align:left;padding:12px;border-radius:16px;margin-top:10px;background:#fff;border:2px solid transparent;transition:.2s}
+.g-item .n{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font:800 20px var(--t);background:var(--gelo);color:var(--royal)}
+.g-item .t{font-weight:700;font-size:16px;line-height:1.25;display:block}
+.g-item .s{font-size:13px;color:var(--suave)}
+.g-item.atual{border-color:var(--ciano)}.g-item.atual .n{background:var(--royal);color:#fff}
+.g-item.feito .n{background:var(--marinho);color:var(--ciano)}
+.g-item.bloq{opacity:.55}.g-item.bloq .n{background:#e2e5f0;color:#8a90ad}
+.g-item:hover{transform:translateX(-4px);border-color:var(--ciano)}
+.g-rodape{padding:16px 22px;border-top:1px solid var(--linha);font-size:13px;color:var(--suave);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.g-rodape button{color:var(--royal);font-weight:700;text-decoration:underline}
+
+/* Botões */
+.btn{text-decoration:none;display:inline-flex;align-items:center;gap:12px;background:var(--ciano);color:var(--marinho);font:700 20px var(--c);letter-spacing:.6px;text-transform:uppercase;padding:14px 28px;border-radius:50px;box-shadow:0 12px 30px -10px rgba(1,248,255,.7);transition:.25s}
+.btn:hover{transform:translateY(-3px);background:#fff}
+.btn.esc{background:var(--royal);color:#fff;box-shadow:var(--sombra)}.btn.esc:hover{background:var(--marinho)}
+.btn.cont{background:#fff;color:var(--royal);box-shadow:inset 0 0 0 2px var(--royal)}
+.btn svg{width:22px;height:22px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+/* Capa */
+.capa{position:relative;min-height:100vh;background:radial-gradient(120% 90% at 80% 20%,#161fc4 0%,var(--marinho) 55%,var(--noite) 100%);color:#fff;padding:120px 0 150px;overflow:hidden;display:flex;align-items:center}
+.capa .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;width:100%;position:relative;z-index:2}
+.selo{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);padding:6px 14px;border-radius:30px;font-weight:500;font-size:14px;margin-bottom:22px}
+.selo i{width:8px;height:8px;border-radius:50%;background:var(--ciano);box-shadow:0 0 0 4px rgba(1,248,255,.25)}
+.capa h1{font:800 clamp(44px,6.4vw,80px)/1 var(--t);letter-spacing:-1px}
+.capa h1 span{display:block;color:var(--ciano);font:700 clamp(20px,2.3vw,28px)/1.2 var(--c);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.capa p{font-size:20px;color:#d3d7ff;margin:24px 0 30px;max-width:520px}
+.capa .infos{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:34px}
+.capa .infos span{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border-radius:14px;padding:8px 14px;font-size:15px;color:#e3e6ff}
+.capa .infos svg{width:20px;height:20px;color:var(--ciano)}
+.rolar{position:absolute;bottom:96px;left:50%;transform:translateX(-50%);font-size:13px;color:#b8bdff;display:flex;flex-direction:column;align-items:center;gap:6px;animation:sobe 2s infinite;z-index:2}
+@keyframes sobe{50%{transform:translate(-50%,-6px)}}
+
+/* Combo forma orgânica + personagem */
+.combo{position:relative;width:100%}
+.combo::before{content:"";position:absolute;inset:8% -4% -4% 12%;background:var(--vivo);border-radius:42% 58% 38% 62%/58% 41% 59% 42%;z-index:0;animation:morph 14s ease-in-out infinite}
+.combo.cia::before{background:var(--ciano)}
+@keyframes morph{50%{border-radius:58% 42% 55% 45%/44% 58% 42% 56%}}
+.forma{position:relative;z-index:1;border-radius:58% 42% 51% 49%/46% 55% 45% 54%;overflow:hidden;aspect-ratio:4/3.3;background:linear-gradient(160deg,#fff 0%,var(--gelo) 100%);box-shadow:0 20px 50px -24px rgba(0,0,0,.55);display:grid;place-items:center}
+.forma img{width:86%;height:auto}
+.combo .pers{position:absolute;z-index:2;left:-6%;bottom:-10%;width:27%;filter:drop-shadow(0 14px 14px rgba(0,0,0,.28))}
+.combo .pers.dir{left:auto;right:-6%}
+
+/* ===== MENU INTERATIVO: imagem do roteiro (IMG01) em toda a seção, com áreas clicáveis ===== */
+.menu{position:relative;background:var(--marinho);color:#fff;overflow:hidden}
+.menu{padding:110px 0 130px}
+.menu .wrap{position:relative;z-index:2}
+.vidro{background:rgba(5,6,58,.72);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:22px;box-shadow:0 14px 30px -16px rgba(0,0,0,.6)}
+.menu-tit{padding:14px 22px}
+.menu-tit .sub{margin-bottom:4px;color:var(--ciano)}
+.menu-tit h2{font:800 clamp(24px,2.6vw,34px)/1.1 var(--t)}
+.menu-tit p{font-size:15px;color:#d3d7ff;margin-top:4px}
+.anel{display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px}
+.anel svg{width:56px;height:56px;transform:rotate(-90deg)}
+.anel .num{font:800 20px var(--t)}
+.anel small{display:block;font-size:13px;color:#cfd3ff}
+@keyframes pulsa{0%{box-shadow:0 0 0 0 rgba(1,248,255,.85),0 10px 22px -8px rgba(5,6,58,.7)}70%{box-shadow:0 0 0 18px rgba(1,248,255,0),0 10px 22px -8px rgba(5,6,58,.7)}}
+.menu-topo{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:28px}
+.trilha{position:relative;background:var(--gelo2);border-radius:30px;padding:46px 34px 38px;box-shadow:var(--sombra2)}
+.onda{position:relative;width:100%;aspect-ratio:1000/300}
+.onda>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.onda .fio{fill:none;stroke:url(#gradOnda);stroke-width:34;stroke-linecap:round}
+.onda .sombra-fio{fill:none;stroke:rgba(5,6,58,.10);stroke-width:34;stroke-linecap:round;transform:translate(6px,10px);filter:blur(6px)}
+.passo{position:absolute;top:50%;width:15%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;background:#D8DFE0;border:6px solid #fff;display:block;padding:0;box-shadow:0 16px 30px -14px rgba(5,6,58,.55);transition:transform .25s,box-shadow .25s}
+.passo .ic{position:absolute;inset:0;border-radius:50%;overflow:hidden;display:block}.passo .ic img{width:100%;height:100%;object-fit:contain;display:block;transition:filter .25s,opacity .25s}
+.passo .n{position:absolute;left:50%;top:-16px;transform:translateX(-50%);min-width:36px;height:36px;z-index:1;padding:0 6px;border-radius:20px;display:grid;place-items:center;font:800 16px var(--t);background:var(--royal);color:#fff;border:3px solid #fff}
+.passo .st{position:absolute;right:0;bottom:4%;z-index:1;width:34px;height:34px;border-radius:50%;display:none;place-items:center;background:var(--noite);border:3px solid #fff}
+.passo .st{align-items:center;justify-content:center}.passo .st svg{display:block;width:18px;height:18px;flex:none;margin:0}
+.passo:hover,.passo:focus-visible{transform:translate(-50%,-50%) scale(1.07);box-shadow:0 0 0 6px rgba(1,248,255,.35),0 18px 34px -14px rgba(5,6,58,.6)}
+.passo.atual{box-shadow:0 0 0 6px var(--ciano),0 18px 34px -14px rgba(5,6,58,.6);animation:pulsaAro 2s infinite}
+.passo.atual .n{background:var(--ciano);color:var(--marinho)}
+.passo.feito .n{background:var(--marinho);color:var(--ciano)}
+.passo.feito .st,.passo.bloq .st{display:grid}
+.passo.bloq .ic img{filter:grayscale(.5);opacity:.8}.passo.bloq .n{background:#c9cdea;color:#5d6390}
+@keyframes pulsaAro{0%,100%{box-shadow:0 0 0 6px var(--ciano),0 0 0 6px rgba(1,248,255,.5)}50%{box-shadow:0 0 0 6px var(--ciano),0 0 0 22px rgba(1,248,255,0)}}
+.textos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:22px}
+.ptx{display:block;align-self:start;text-align:left;padding:10px 12px;border-radius:16px;color:var(--texto);transition:background .2s}
+.ptx:hover{background:var(--gelo)}
+.ptx .mini{display:none}
+.ptx h3{font:800 19px/1.2 var(--t);color:var(--marinho);margin-bottom:6px}
+.ptx p{font-size:15px;line-height:1.45;color:var(--suave)}
+.ptx .rot{display:inline-block;margin-top:8px;font:700 13px var(--c);letter-spacing:.8px;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:var(--gelo);color:var(--suave)}
+.ptx.atual .rot{background:var(--ciano);color:var(--marinho)}
+.ptx.feito .rot{background:var(--marinho);color:var(--ciano)}
+.ptx.bloq h3{color:#6a7099}
+.toast{position:fixed;z-index:80;left:50%;bottom:96px;transform:translate(-50%,20px);opacity:0;transition:.3s;pointer-events:none;padding:12px 20px;font-size:16px;text-align:center;max-width:90%;color:#fff}
+
+/* Locução */
+.loc{display:flex;gap:18px;align-items:center;margin-top:28px;background:#fff;border-radius:22px;padding:16px 22px 16px 16px;box-shadow:var(--sombra);border:2px solid var(--gelo)}
+.loc .av{flex:none;width:76px;height:76px;border-radius:50%;background:#BBC4C7;overflow:hidden;border:3px solid #fff;box-shadow:var(--sombra)}
+.loc .av img{width:100%;height:100%;object-fit:cover;display:block}
+.loc .cab2{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:4px}
+.loc .cab2 strong{font:800 18px var(--t);color:var(--marinho)}
+.tag-loc{font:700 13px var(--c);letter-spacing:1px;text-transform:uppercase;background:var(--marinho);color:var(--ciano);padding:3px 10px;border-radius:20px}
+.play{display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--vivo);color:var(--vivo);border-radius:20px;padding:3px 12px;font-size:14px}
+.loc p{font-size:17px;color:var(--suave);font-style:italic}
+.claro .loc,.loc.vidro{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.16);box-shadow:none}
+.claro .loc p,.loc.vidro p{color:#d3d7ff}.claro .loc .cab2 strong,.loc.vidro .cab2 strong{color:#fff}
+.claro .play,.loc.vidro .play{color:var(--ciano);border-color:var(--ciano)}
+
+/* Abertura da etapa */
+.et-abre{position:relative;background:linear-gradient(180deg,var(--gelo) 0%,#dfe6ff 100%);padding:90px 0 0;overflow:hidden}
+.et-abre .grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;position:relative;z-index:2}
+.et-abre .txt{padding-bottom:90px}
+.et-abre .combo{margin:0 0 90px 6%;max-width:520px}
+.et-num{display:flex;align-items:center;gap:16px}
+.et-num b{font:800 120px/.8 var(--t);color:transparent;-webkit-text-stroke:2.5px var(--royal)}
+.et-num span{font:700 16px var(--c);letter-spacing:2px;text-transform:uppercase;color:var(--vivo);background:#fff;padding:6px 14px;border-radius:20px}
+.et-abre h2{margin:16px 0 14px}
+.trilha-rec{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.trilha-rec span{display:flex;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:8px 12px;font-size:15px;font-weight:500;color:var(--marinho);box-shadow:0 6px 16px -10px rgba(8,9,77,.4)}
+.trilha-rec span i{width:22px;height:22px;border-radius:50%;border:2px solid var(--linha);display:grid;place-items:center;font-style:normal;font-size:12px;color:#fff}
+.trilha-rec span.ok i{background:var(--ok);border-color:var(--ok)}
+.trilha-rec span.ok i::after{content:"✓"}
+
+.bloco{position:relative;padding:90px 0;overflow:hidden}
+.bloco.branco{background:#fff}
+.bloco.azul{background:radial-gradient(100% 80% at 10% 0%,#1620c9 0%,var(--royal) 45%,var(--marinho) 100%);color:#fff}
+.bloco.noite{background:var(--marinho);color:#fff}
+.bloco.gelo{background:var(--gelo)}
+.bloco .wrap{position:relative;z-index:2}
+.badge{display:inline-flex;align-items:center;gap:8px;font:700 14px var(--c);letter-spacing:1.5px;text-transform:uppercase;background:var(--gelo);color:var(--royal);border-radius:20px;padding:5px 12px;margin-bottom:16px}
+.claro .badge{background:rgba(255,255,255,.12);color:var(--ciano)}
+.badge svg{width:18px;height:18px}
+
+/* Fala da Lia */
+.fala{display:flex;gap:16px;align-items:flex-end;margin:26px 0}
+.fala .av{flex:none;width:84px;height:84px;border-radius:50%;background:#BBC4C7;overflow:hidden;border:3px solid #fff;box-shadow:var(--sombra)}
+.fala .av img{width:100%;height:100%;object-fit:cover;display:block}
+.fala .bal{position:relative;background:#fff;border-radius:22px 22px 22px 6px;padding:16px 20px;box-shadow:var(--sombra);font-size:17.5px;max-width:760px}
+.fala .bal b{display:block;font:700 14px var(--c);letter-spacing:1.5px;text-transform:uppercase;color:var(--vivo)}
+
+/* Flip cards (bloco 5) */
+.flips{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:34px}
+.flip{perspective:1400px;min-height:470px;cursor:pointer}
+.flip .in{position:relative;width:100%;height:100%;min-height:470px;transition:transform .8s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .v{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;overflow:hidden;box-shadow:var(--sombra2)}
+.flip .f{background:#fff;display:flex;flex-direction:column}
+.flip .f img{flex:1;width:100%;object-fit:contain;min-height:0;background:#DFE5E5}
+.flip .f .rod{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 22px;background:#fff}
+.flip .f h3{font:800 26px var(--t);color:var(--marinho)}
+.flip .f small{display:flex;align-items:center;gap:6px;font:700 14px var(--c);letter-spacing:1px;text-transform:uppercase;color:var(--vivo);background:var(--gelo);padding:6px 12px;border-radius:20px}
+.flip .v{transform:rotateY(180deg);background:linear-gradient(150deg,var(--royal),var(--vivo));color:#fff;padding:34px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.flip .v.b{background:linear-gradient(150deg,var(--marinho),var(--royal))}
+.flip .v .ico{width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.14);display:grid;place-items:center;color:var(--ciano)}
+.flip .v .ico svg{width:36px;height:36px}
+.flip .v h3{font:800 28px var(--t)}
+.flip .v p{font-size:18px;color:#e6e9ff}
+.flip .v .ex{background:rgba(255,255,255,.1);border-radius:16px;padding:12px 16px;font-size:16.5px}
+.flip .v .ex b{color:var(--ciano)}
+
+/* Saiba mais */
+.saiba{margin-top:26px;border-radius:20px;background:#fff;padding:6px;box-shadow:var(--sombra)}
+.saiba summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;font:700 17px var(--c);letter-spacing:1.5px;text-transform:uppercase;color:var(--royal)}
+.saiba summary::-webkit-details-marker{display:none}
+.saiba summary .ic{width:34px;height:34px;border-radius:10px;background:var(--gelo);display:grid;place-items:center}
+.saiba summary .mais{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--royal);color:#fff;display:grid;place-items:center;font-size:20px;transition:.3s}
+.saiba[open] summary .mais{transform:rotate(45deg)}
+.saiba .corpo{padding:0 18px 16px;font-size:17px}
+.saiba .corpo p+p{margin-top:8px}
+
+/* Carrossel critérios (bloco 6) */
+.b6{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:34px;align-items:center;margin-top:30px}
+.b6 .ilu{position:relative}
+.b6 .ilu .forma{aspect-ratio:1}
+.carro{position:relative}
+.janela{overflow:hidden;border-radius:26px;box-shadow:var(--sombra2)}
+.trilho{display:flex;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.slide{flex:0 0 100%;display:grid;grid-template-columns:130px 1fr;gap:26px;align-items:center;padding:38px 40px;background:linear-gradient(120deg,var(--royal),var(--vivo));color:#fff;min-height:240px;position:relative;overflow:hidden}
+.slide::after{content:attr(data-n);position:absolute;right:18px;bottom:-30px;font:800 170px/1 var(--t);color:rgba(255,255,255,.07)}
+.slide .ico{width:130px;height:130px;border-radius:36px;background:rgba(255,255,255,.13);display:grid;place-items:center;color:var(--ciano)}
+.slide .ico svg{width:70px;height:70px}
+.slide .n{font:700 16px var(--c);letter-spacing:2px;text-transform:uppercase;color:var(--ciano)}
+.slide h3{font:800 30px/1.15 var(--t);margin:6px 0 10px}
+.slide p{font-size:18.5px;color:#e3e6ff}
+.ctrl{display:flex;align-items:center;gap:12px;margin-top:18px}
+.seta{width:48px;height:48px;border-radius:50%;background:var(--royal);color:#fff;display:grid;place-items:center;transition:.2s}
+.seta:hover:not([disabled]){background:var(--marinho)}
+.seta[disabled]{opacity:.3;cursor:default}
+.dots{display:flex;gap:8px;margin-left:8px}
+.dots i{width:10px;height:10px;border-radius:6px;background:var(--linha);transition:.3s}
+.dots i.on{width:30px;background:var(--royal)}
+.faixa-nota{display:flex;gap:16px;align-items:center;background:var(--marinho);color:#fff;border-radius:20px;padding:20px 24px;margin-top:30px;font-size:18px}
+.faixa-nota svg{flex:none;width:40px;height:40px;color:var(--ciano)}
+.faixa-nota b{color:var(--ciano)}
+
+/* Arrastar e soltar */
+.ativ{background:#fff;color:var(--texto);border-radius:26px;padding:32px;margin-top:34px;box-shadow:var(--sombra2)}
+.ativ .topo-a{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;margin-bottom:6px}
+.ativ h3{font:800 26px var(--t);color:var(--marinho)}
+.chip{font:700 14px var(--c);letter-spacing:1px;text-transform:uppercase;color:var(--royal);background:var(--gelo);padding:5px 12px;border-radius:20px}
+.ativ .dica{font-size:16px;color:var(--suave);margin-bottom:20px}
+.banco{display:flex;flex-wrap:wrap;gap:10px;min-height:58px;padding:12px;border:2px dashed var(--linha);border-radius:18px;margin-bottom:18px}
+.banco:empty::after{content:"Todos os itens foram classificados.";color:var(--suave);font-size:15px;align-self:center}
+.item{background:var(--gelo);border:2px solid var(--linha);border-radius:14px;padding:10px 14px;font-size:16px;cursor:grab;user-select:none;text-align:left;color:var(--texto);transition:.15s}
+.item:hover{border-color:var(--vivo)}
+.item.sel{border-color:var(--royal);background:#fff;box-shadow:0 0 0 4px rgba(11,19,182,.18)}
+.item.ok{background:var(--ok-bg);border-color:var(--ok);cursor:default}
+.item.no{background:var(--erro-bg);border-color:var(--erro);cursor:default}
+.item small{display:block;font-size:14px;margin-top:4px;color:var(--suave)}
+.colunas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.col{border-radius:18px;border:2px solid var(--linha);min-height:170px;padding:0 12px 12px;display:flex;flex-direction:column;gap:10px;transition:.15s}
+.col h4{margin:0 -12px 2px;padding:12px;border-radius:16px 16px 0 0;font:700 19px var(--c);letter-spacing:2px;text-transform:uppercase;text-align:center;color:#fff;display:flex;justify-content:center;gap:8px;align-items:center}
+.col h4 svg{width:20px;height:20px}
+.col.a h4{background:var(--royal)}.col.d h4{background:var(--marinho)}
+.col.alvo{border-color:var(--ciano);background:#ECFEFF}
+.col .vazio{color:var(--suave);font-size:14px;text-align:center;margin:auto 0}
+.resul{margin-top:16px;font-weight:500}
+
+/* Linha do tempo (bloco 7) */
+.defs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0 10px}
+.defs div{display:flex;gap:14px;align-items:center;background:#fff;border-radius:20px;padding:16px 18px;box-shadow:var(--sombra)}
+.defs .ic{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--royal);color:var(--ciano)}
+.defs div+div .ic{background:var(--marinho)}
+.defs .ic svg{width:28px;height:28px}
+.defs b{font-family:var(--t);color:var(--marinho);font-size:19px}
+.defs p{font-size:16px;color:var(--suave)}
+.tl{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:34px;position:relative}
+.tl::before{content:"";position:absolute;left:4%;right:4%;top:-18px;height:6px;border-radius:4px;background:var(--linha)}
+.tl .barra{position:absolute;left:4%;top:-18px;height:6px;border-radius:4px;background:linear-gradient(90deg,var(--ciano),var(--royal));width:0;transition:width .4s}
+.et{position:relative;text-align:left;background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--sombra);border:3px solid transparent;transition:.25s}
+.et::before{content:"";position:absolute;left:50%;top:-25px;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--linha);z-index:2;transition:.25s}
+.et img{width:100%;aspect-ratio:29/35;object-fit:contain;background:#F4EFEA;filter:saturate(.6);transition:.3s}
+.et span{display:block;padding:10px 12px 12px;font:700 16px/1.15 var(--c);letter-spacing:.5px;text-transform:uppercase;color:var(--marinho)}
+.et em{font-style:normal;color:var(--vivo)}
+.et:hover{transform:translateY(-4px)}
+.et.vista::before{border-color:var(--royal);background:var(--royal)}
+.et.vista img{filter:none}
+.et.on{border-color:var(--ciano);transform:translateY(-6px);box-shadow:0 22px 40px -18px rgba(1,93,214,.6)}
+.et.on::before{background:var(--ciano);border-color:var(--ciano);box-shadow:0 0 0 6px rgba(1,248,255,.3)}
+.et .fogo{position:absolute;top:10px;right:10px;background:var(--ciano);color:var(--marinho);font:700 12px var(--c);letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:12px}
+.painel-et{margin-top:22px;background:var(--marinho);color:#fff;border-radius:22px;padding:22px 26px;display:flex;gap:20px;align-items:center;min-height:110px}
+.painel-et .n{flex:none;width:64px;height:64px;border-radius:20px;background:var(--ciano);color:var(--marinho);display:grid;place-items:center;font:800 28px var(--t)}
+.painel-et h3{font:800 24px var(--t)}
+.painel-et p{color:#d3d7ff}
+.alerta{display:flex;gap:18px;align-items:flex-start;background:#FFF6E0;border:2px solid #F5D9A0;border-radius:22px;padding:22px 24px;margin-top:28px}
+.alerta .ic{flex:none;width:52px;height:52px;border-radius:16px;background:var(--ouro);display:grid;place-items:center;color:var(--marinho)}
+.alerta .ic svg{width:30px;height:30px}
+.alerta h4{font:700 18px var(--c);letter-spacing:1.5px;text-transform:uppercase;color:#8a5a00;margin-bottom:4px}
+.alerta p{font-size:17px}.alerta p+p{margin-top:6px}
+
+/* Concluir etapa */
+.fim-et{text-align:center;padding:10px 0 0}
+.req-info{font-size:15px;margin-bottom:14px}
+.req-info.pronto{color:var(--ciano);font-weight:500}
+
+/* Cenário (bloco 15) */
+.cena{display:grid;grid-template-columns:minmax(0,340px) 1fr;gap:34px;align-items:start;margin-top:24px}
+.cena-img{margin:0;border-radius:22px;overflow:hidden;background:#fff;box-shadow:var(--sombra2);border:4px solid rgba(255,255,255,.9)}.cena-img img{display:block;width:100%;height:auto}
+.balao{position:relative;background:#fff;color:var(--texto);border-radius:24px;padding:24px 26px;box-shadow:var(--sombra2)}
+.balao::after{content:"";position:absolute;left:-14px;bottom:40px;border:14px solid transparent;border-right-color:#fff;border-left:0}
+.balao .rotulo{font:700 15px var(--c);letter-spacing:2px;text-transform:uppercase;color:var(--vivo)}
+.balao .perg{font:700 22px/1.35 var(--t);color:var(--marinho);margin:6px 0 18px}
+.ops{display:grid;gap:12px}
+.op{display:flex;gap:14px;align-items:center;text-align:left;background:var(--gelo);border:2px solid transparent;border-radius:16px;padding:14px 16px;font-size:17px;color:var(--texto);transition:.15s}
+.op:hover:not([disabled]){border-color:var(--vivo);transform:translateX(4px)}
+.op .l{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--royal);font:800 17px var(--t);border:2px solid var(--linha)}
+.op.certa{background:var(--ok-bg);border-color:var(--ok)}.op.certa .l{background:var(--ok);color:#fff;border-color:var(--ok)}
+.op.errada{background:var(--erro-bg);border-color:var(--erro)}.op.errada .l{background:var(--erro);color:#fff;border-color:var(--erro)}
+.op[disabled]{cursor:default}
+.fb{margin-top:18px;border-radius:16px;padding:16px 18px}
+.fb.pos{background:var(--ok-bg)}.fb.neg{background:var(--erro-bg)}
+.fb h4{font:800 19px var(--t);margin-bottom:4px}
+.fb.pos h4{color:var(--ok)}.fb.neg h4{color:var(--erro)}
+.fb p{font-size:17px;margin-bottom:10px}
+.fb .linha{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* Fim */
+.fim{position:relative;background:radial-gradient(120% 90% at 20% 0%,#161fc4 0%,var(--marinho) 60%,var(--noite) 100%);color:#fff;text-align:center;padding:90px 0 80px;overflow:hidden}
+.fim p{color:#d3d7ff;max-width:640px;margin:16px auto 0}
+.fim .trofeu{width:110px;height:110px;margin:0 auto 18px;border-radius:34px;background:var(--ciano);color:var(--marinho);display:grid;place-items:center}
+.fim .trofeu svg{width:60px;height:60px}
+footer{background:var(--noite);color:#9ea4f0;font-size:14px;padding:22px 0}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+
+/* Confete */
+.confete{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
+.confete i{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:cai 2.2s ease-in forwards}
+@keyframes cai{to{transform:translateY(110vh) rotate(720deg);opacity:.6}}
+
+/* Celular */
+@media (max-width:900px){
+  body{font-size:17px}
+  .wrap{padding:0 16px}
+  .topo{padding:0 12px}.topo .amostra,.mini-prog{display:none}
+  .logo img{height:28px}
+  .btn-mapa{font-size:15px;padding:8px 14px 8px 10px}
+  .capa{padding:96px 0 120px;min-height:0}
+  .capa .wrap,.et-abre .grid,.cena,.palco,.b6,.flips,.defs{grid-template-columns:1fr}
+  .capa .combo{max-width:420px;margin:10px auto 30px;width:88%}
+  .capa p{font-size:18px}
+  .rolar,.estrela{display:none}
+  .menu{padding:70px 0 100px}
+  .menu-topo{flex-direction:column;align-items:stretch;gap:10px}
+  .menu-tit,.anel{width:100%}
+  .trilha{padding:22px 14px;border-radius:24px}
+  .onda{display:none}
+  .textos{grid-template-columns:1fr;gap:0;margin:0;position:relative}
+  .textos::before{content:"";position:absolute;left:39px;top:36px;bottom:36px;width:12px;border-radius:8px;background:linear-gradient(180deg,var(--ciano),var(--vivo) 50%,var(--royal))}
+  .ptx{display:grid;grid-template-columns:62px 1fr;gap:14px;align-items:start;padding:10px 8px;position:relative}
+  .ptx .mini{display:block;width:62px;height:62px;border-radius:50%;overflow:hidden;background:#D8DFE0;border:3px solid #fff;box-shadow:0 10px 20px -10px rgba(5,6,58,.6);position:relative;z-index:1}
+  .ptx .mini img{width:100%;height:100%;object-fit:contain;display:block}
+  .ptx.atual .mini{box-shadow:0 0 0 4px var(--ciano)}
+  .ptx.bloq .mini img{filter:grayscale(.5);opacity:.8}
+  .ptx.feito .mini{box-shadow:0 0 0 4px var(--marinho)}
+  .ptx h3{font-size:18px;margin-top:4px}
+  .ptx p{font-size:14px}
+  .et-abre{padding-top:60px}.et-abre .txt{padding-bottom:10px}
+  .et-abre .combo{margin:10px auto 70px;width:84%}
+  .et-num b{font-size:84px}
+  .bloco{padding:60px 0}
+  .flip,.flip .in{min-height:500px}
+  .flip .v{padding:24px 20px;gap:10px}.flip .v h3{font-size:24px}.flip .v p{font-size:16.5px}.flip .v .ex{font-size:15.5px}
+  .slide{grid-template-columns:1fr;gap:16px;padding:28px 22px;min-height:0}
+  .slide .ico{width:80px;height:80px;border-radius:24px}.slide .ico svg{width:44px;height:44px}
+  .slide h3{font-size:25px}.slide p{font-size:17px}
+  .b6 .ilu{max-width:340px;margin:0 auto}
+  .ativ{padding:22px 14px}
+  .tl{grid-template-columns:repeat(5,minmax(120px,1fr));overflow-x:auto;padding:24px 4px 10px;margin-top:10px;scroll-snap-type:x mandatory}
+  .tl::before,.tl .barra{display:none}
+  .et{scroll-snap-align:start}.et::before{display:none}
+  .painel-et{flex-direction:column;align-items:flex-start;gap:12px}
+  .cena-img{max-width:240px;margin:0 auto}
+  .balao{padding:20px 16px}
+  .balao::after{left:50%;bottom:auto;top:-14px;border:14px solid transparent;border-bottom-color:#fff;border-top:0;transform:translateX(-50%)}
+  .balao .perg{font-size:19px}
+  .loc{align-items:flex-start;padding:14px}.loc .av{width:56px;height:56px}
+  .fala .av{width:60px;height:60px}
+}
+@media (max-width:560px){
+  .colunas{grid-template-columns:1fr}
+  .col{min-height:96px}.col .vazio{margin:14px 0}
+  .item small{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <div style="display:flex;align-items:center"><span class="logo"><img src="assets/APS22_AP01_Logo-Apsen-Azul.svg" alt="Apsen"></span><span class="amostra">Amostra visual · texto em validação</span></div>
+  <div class="dir">
+    <div class="mini-prog"><span>Jornada</span><span class="b" id="miniProg"></span></div>
+    <button class="btn-mapa" id="abreMapa" aria-label="Abrir minha jornada">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Minha jornada</button>
+  </div>
+</div>
+<div class="progresso" id="progresso"></div>
+
+<div class="veu" id="veu"></div>
+<aside class="gaveta" id="gaveta" aria-label="Minha jornada">
+  <header>
+    <button class="fechar" id="fechaMapa" aria-label="Fechar">×</button>
+    <h3>Minha jornada</h3>
+    <p><span id="gProg">0 de 5</span> etapas concluídas</p>
+    <svg class="onda" viewBox="0 0 440 46" preserveAspectRatio="none"><path d="M0 30 C110 0 220 50 330 22 S440 18 440 18 V46 H0Z" fill="#F4F6FF"/></svg>
+  </header>
+  <div class="lista" id="gLista"></div>
+  <div class="g-rodape"><span>As etapas são liberadas em sequência.</span><button id="zerar">Recomeçar</button></div>
+</aside>
+
+<!-- ============ CAPA ============ -->
+<section class="capa" id="inicio">
+  <div class="pontilhado"></div>
+  <span class="estrela" style="top:16%;left:5%;width:26px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 9.6l-5.4 4.8L18.2 22 12 18.1 5.8 22l1.6-7.6L2 9.6l7.1-.7z"/></svg></span>
+  <span class="estrela" style="top:74%;left:42%;width:16px;animation-delay:-2s"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 9.6l-5.4 4.8L18.2 22 12 18.1 5.8 22l1.6-7.6L2 9.6l7.1-.7z"/></svg></span>
+  <span class="estrela" style="top:20%;right:6%;width:20px;animation-delay:-4s"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 9.6l-5.4 4.8L18.2 22 12 18.1 5.8 22l1.6-7.6L2 9.6l7.1-.7z"/></svg></span>
+  <div class="wrap">
+    <div>
+      <div class="selo"><i></i> Treinamentos de Contabilidade · Módulo 1</div>
+      <h1><span>Gestão patrimonial</span>Ativo Imobilizado e Intangível</h1>
+      <p>Papéis, responsabilidades, aquisições, transferências e baixas de ativos</p>
+      <div class="infos">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Cerca de 20 minutos</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/></svg>5 etapas</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>5 questões no final</span>
+      </div>
+      <button class="btn" id="comecar">Começar a jornada
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="combo cia">
+      <div class="forma"><img src="assets/APS22_M01_IMG-S01_Patrimonio.webp?v=5" alt="Equipamento de laboratório, notebook, cadeira e prancheta com checklist"></div>
+      <img class="pers dir" src="assets/APS22_M01_IMG-P01_Lia-Acena-R02.webp?v=1" alt="Lia acenando">
+    </div>
+  </div>
+  <div class="rolar"><svg width="22" height="34" viewBox="0 0 22 34" fill="none" stroke="#b8bdff" stroke-width="2"><rect x="1" y="1" width="20" height="32" rx="10"/><path d="M11 8v7"/></svg>Role para iniciar</div>
+  <svg class="onda-base" viewBox="0 0 1440 100" preserveAspectRatio="none"><path d="M0 62 C240 6 460 112 760 62 S1220 6 1440 54 V100 H0Z" fill="#01F8FF"/><path d="M0 84 C300 34 560 112 860 78 S1260 44 1440 74 V100 H0Z" fill="#0B13B6"/></svg>
+</section>
+
+<!-- ============ MENU INTERATIVO (linear em 5 etapas, APS22-D13/D14) ============ -->
+<section class="menu" id="menu">
+  <div class="wrap">
+    <div class="menu-topo">
+      <div class="menu-tit vidro"><div class="sub">Menu interativo</div><h2>Sua jornada em 5 etapas</h2><p id="menuMsg"></p></div>
+      <div class="anel vidro" aria-live="polite">
+        <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="8"/><circle id="anelArc" cx="32" cy="32" r="26" fill="none" stroke="#01F8FF" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 200" style="transition:stroke-dasharray .8s"/></svg>
+        <div><div class="num" id="anelNum">0 de 5</div><small>etapas concluídas</small></div>
+      </div>
+    </div>
+    <div class="loc vidro rv" style="margin:0 0 24px">
+      <div class="av"><img src="assets/APS22_M01_IMG-L01_Lia-Rosto.webp?v=1" alt=""></div>
+      <div><div class="cab2"><strong>Lia</strong><span class="tag-loc">LOC01 · boas-vindas</span><button class="play">▶ áudio a gravar</button></div>
+      <p>Olá! Boas-vindas ao treinamento de Ativo Imobilizado e Intangível. Aqui você vai descobrir como cada área ajuda a manter os bens da Apsen corretos, do pedido de compra até a baixa.</p></div>
+    </div>
+    <div class="trilha rv">
+      <div class="onda" id="onda">
+        <svg viewBox="0 0 1000 300" aria-hidden="true">
+          <defs><linearGradient id="gradOnda" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#01F8FF"/><stop offset=".45" stop-color="#015DD6"/><stop offset="1" stop-color="#0B13B6"/></linearGradient></defs>
+          <path class="sombra-fio" d="M0,150 A100,100 0 0 1 200,150 A100,100 0 0 0 400,150 A100,100 0 0 1 600,150 A100,100 0 0 0 800,150 A100,100 0 0 1 1000,150"/>
+          <path class="fio" d="M0,150 A100,100 0 0 1 200,150 A100,100 0 0 0 400,150 A100,100 0 0 1 600,150 A100,100 0 0 0 800,150 A100,100 0 0 1 1000,150"/>
+        </svg>
+      </div>
+      <div class="textos" id="textosEt"></div>
+    </div>
+  </div>
+  <div class="toast vidro" id="toast" role="status"></div>
+</section>
+
+<!-- ============ ETAPA 1 · O que é um ativo ============ -->
+<section id="et1">
+  <div class="et-abre">
+    <div class="pontilhado esc"></div>
+    <div class="wrap grid">
+      <div class="txt rv">
+        <div class="et-num"><b>01</b><span>Etapa 1 de 5</span></div>
+        <h2 class="tit">O que é um ativo</h2>
+        <p class="lead">O conceito, a diferença entre ativo e despesa e quando a depreciação começa.</p>
+        <div class="trilha-rec" id="recs"></div>
+        <div style="margin-top:26px"><a class="btn esc" href="#b5">Começar a etapa <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></div>
+      </div>
+      <div class="combo rv">
+        <div class="forma"><img src="assets/APS22_M01_IMG-S02_Ativo-ou-Despesa.webp?v=5" alt="Balança com um notebook de um lado e mouse, toner e canetas do outro"></div>
+        <img class="pers" src="assets/APS22_M01_IMG-P02_Lia-Pensativa-R02.webp?v=1" alt="Lia pensativa">
+      </div>
+    </div>
+  </div>
+
+  <!-- Bloco 5 -->
+  <div class="bloco branco" id="b5">
+    <div class="wrap">
+      <span class="badge rv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/></svg>Cards que viram</span>
+      <h2 class="tit rv">Ativo imobilizado ou ativo intangível?</h2>
+      <div class="fala rv">
+        <div class="av"><img src="assets/APS22_M01_IMG-L01_Lia-Rosto.webp?v=1" alt=""></div>
+        <div class="bal"><b>Lia</b>Quando abri meu primeiro chamado, me perguntaram se o item era imobilizado ou intangível. Eu não sabia a diferença! Clique nos cards e veja como é simples.</div>
+      </div>
+      <div class="flips">
+        <div class="flip rv" tabindex="0" role="button" aria-label="Virar card Ativo imobilizado" data-rec="flip">
+          <div class="in">
+            <div class="f"><img src="assets/APS22_M01_IMG05-R02-A_Imobilizado.webp?v=1" alt="Bancada de laboratório com microscópio, tubos de ensaio e frasco"><div class="rod"><h3>Ativo imobilizado</h3><small>Clique para virar ↻</small></div></div>
+            <div class="v"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></div>
+              <h3>Ativo imobilizado</h3><p>É o conjunto de <b>bens tangíveis</b>, ou seja, físicos, que a Apsen usa para manter suas atividades principais e de apoio.</p>
+              <div class="ex"><b>Exemplos:</b> máquinas e equipamentos, móveis e utensílios, veículos, equipamentos de informática, instalações, edificações e benfeitorias.</div></div>
+          </div>
+        </div>
+        <div class="flip rv" tabindex="0" role="button" aria-label="Virar card Ativo intangível" data-rec="flip">
+          <div class="in">
+            <div class="f"><img src="assets/APS22_M01_IMG05-R02-B_Intangivel.webp?v=1" alt="Tela de computador com um software aberto"><div class="rod"><h3>Ativo intangível</h3><small>Clique para virar ↻</small></div></div>
+            <div class="v b"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8a5 5 0 1 1 1.2-9.9A6 6 0 0 1 20.5 11a4 4 0 0 1-3 8z"/></svg></div>
+              <h3>Ativo intangível</h3><p>É aquele que <b>não tem existência física</b>, mas gera benefício econômico para a empresa. São direitos ou recursos controlados pela Apsen e usados nas suas atividades.</p>
+              <div class="ex"><b>Exemplos:</b> softwares, marcas, licenças, direitos de uso e outros direitos sem substância física.</div></div>
+          </div>
+        </div>
+      </div>
+      <details class="saiba rv"><summary><span class="ic">📘</span>Saiba mais! <span class="mais">+</span></summary>
+        <div class="corpo"><p>As regras contábeis do imobilizado estão no <b>CPC 27 – Ativo Imobilizado</b> e as do intangível no <b>CPC 04 – Ativo Intangível</b>. Os dois precisam ser registrados, acompanhados e depreciados ou amortizados conforme essas normas.</p></div></details>
+    </div>
+  </div>
+
+  <!-- Bloco 6 -->
+  <div class="bloco gelo" id="b6">
+    <div class="pontilhado esc"></div>
+    <div class="wrap">
+      <span class="badge rv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v18M5 7h14M7 7l-3 7h6zM17 7l-3 7h6z"/></svg>É ativo ou despesa?</span>
+      <h2 class="tit rv">Todo bem é um ativo?</h2>
+      <p class="lead rv" style="margin-top:12px;max-width:760px">Não! Nem tudo o que a Apsen compra vira ativo. Para ser controlado como ativo imobilizado, o bem precisa atender a alguns critérios. Clique em “próximo” e confira.</p>
+      <div class="b6">
+        <div class="carro rv" id="carro1" data-rec="carro">
+          <div class="janela"><div class="trilho">
+            <div class="slide" data-n="1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15h3"/></svg></div>
+              <div><div class="n">Critério 1 de 3</div><h3>Vida útil maior que 1 ano</h3><p>O bem será usado por mais de 12 meses.</p></div></div>
+            <div class="slide" data-n="2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-1-1.6-1.6-3-1.6-1.7 0-3 .9-3 2.2 0 3 6 1.6 6 4.5 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.1-1.7M12 6v1.6M12 16.4V18"/></svg></div>
+              <div><div class="n">Critério 2 de 3</div><h3>Custo acima de R$ 1.200,00</h3><p>O custo de aquisição é superior a R$ 1.200,00.</p></div></div>
+            <div class="slide" data-n="3"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M7.5 7.5h.01M10 11v4M12.5 10v6M15 12v2"/></svg></div>
+              <div><div class="n">Critério 3 de 3</div><h3>Passível de controle</h3><p>É possível identificar o bem, saber onde ele está e quem é responsável por ele.</p></div></div>
+          </div></div>
+          <div class="ctrl"><button class="seta" data-dir="-1" aria-label="Anterior"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button><button class="seta" data-dir="1" aria-label="Próximo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button><div class="dots"></div></div>
+        </div>
+        <div class="ilu rv"><div class="combo cia"><div class="forma"><img src="assets/APS22_M01_IMG-S02_Ativo-ou-Despesa.webp?v=5" alt=""></div></div></div>
+      </div>
+      <div class="faixa-nota rv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span>Itens que não atendem a esses critérios são registrados como <b>despesa</b> no mês da compra.</span></div>
+      <details class="saiba rv"><summary><span class="ic">⚖️</span>Saiba mais! <span class="mais">+</span></summary>
+        <div class="corpo"><p>O limite de R$ 1.200,00 tem origem na legislação fiscal: <b>Lei 12.973/2014</b> e <b>IN RFB 1.700/2017</b>. Os critérios contábeis estão no <b>CPC 27</b>.</p>
+        <p>Para ativos intangíveis, como softwares e licenças, consulte a Contabilidade sobre os critérios aplicáveis.</p></div></details>
+      <div class="loc rv">
+        <div class="av"><img src="assets/APS22_M01_IMG-L01_Lia-Rosto.webp?v=1" alt=""></div>
+        <div><div class="cab2"><strong>Dica da Lia</strong><span class="tag-loc">LOC05 · dica</span><button class="play">▶ áudio a gravar</button></div>
+        <p>Dica da Lia: antes de pedir uma compra, confira três pontos. O bem vai durar mais de um ano? Custa mais de mil e duzentos reais? Dá para identificar e controlar? Se a resposta for não, ele entra como despesa.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bloco azul claro" id="b6-ativ">
+    <div class="pontilhado"></div>
+    <div class="wrap">
+      <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Atividade de fixação</span>
+      <h2 class="tit">Ativo ou despesa?</h2>
+      <div class="ativ" id="dnd">
+        <div class="topo-a"><h3>Arraste cada item para a coluna correta</h3><span class="chip">Sem nota</span></div>
+        <p class="dica">No celular, toque no item e depois na coluna.</p>
+        <div class="banco"></div>
+        <div class="colunas">
+          <div class="col a" data-col="Ativo"><h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/></svg>Ativo</h4><div class="vazio">Solte aqui</div></div>
+          <div class="col d" data-col="Despesa"><h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6"/></svg>Despesa</h4><div class="vazio">Solte aqui</div></div>
+        </div>
+        <p class="resul" hidden></p>
+        <div style="margin-top:14px"><button class="btn cont" id="dnd-reset" hidden>Refazer</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bloco 7 -->
+  <div class="bloco branco" id="b7">
+    <div class="wrap">
+      <span class="badge rv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/></svg>Linha do tempo</span>
+      <h2 class="tit rv">Depreciação, amortização e o momento certo de começar</h2>
+      <div class="fala rv">
+        <div class="av"><img src="assets/APS22_M01_IMG-L01_Lia-Rosto.webp?v=1" alt=""></div>
+        <div class="bal"><b>Lia</b>Quando o equipamento novo chegou, a Contabilidade me perguntou: “ele já está pronto para uso?”. Achei a pergunta estranha, até entender o motivo.</div>
+      </div>
+      <p class="rv">Todo ativo perde valor ao longo do tempo, pelo uso, pelo desgaste ou pela obsolescência. Esse valor é reconhecido aos poucos no resultado da empresa:</p>
+      <div class="defs rv">
+        <div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v16h18"/><path d="M7 8l4 4 3-3 5 6"/></svg></span><span><b>Depreciação</b><p>Para o ativo imobilizado (bens físicos).</p></span></div>
+        <div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8a5 5 0 1 1 1.2-9.9A6 6 0 0 1 20.5 11a4 4 0 0 1-3 8z"/></svg></span><span><b>Amortização</b><p>Para o ativo intangível (softwares, licenças, marcas, direitos).</p></span></div>
+      </div>
+      <p class="rv" style="margin-top:18px">O ponto mais importante: a depreciação começa quando o bem está <b>pronto para uso</b>, não necessariamente quando ele chega. Clique em cada etapa da linha do tempo.</p>
+      <div class="tl rv" id="tl" data-rec="tl"><div class="barra"></div></div>
+      <div class="painel-et" id="painelEt" aria-live="polite"><span class="n"></span><div><h3></h3><p></p></div></div>
+      <div class="loc rv">
+        <div class="av"><img src="assets/APS22_M01_IMG-L01_Lia-Rosto.webp?v=1" alt=""></div>
+        <div><div class="cab2"><strong>Atenção</strong><span class="tag-loc">LOC06 · destaque</span><button class="play">▶ áudio a gravar</button></div>
+        <p>Atenção: a depreciação começa quando o bem está pronto para uso. Por isso, sempre avise se o uso será imediato ou informe a data prevista para o equipamento começar a operar.</p></div>
+      </div>
+      <div class="alerta rv"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg></span>
+        <div><h4>Atenção: ativo pronto para uso</h4>
+        <p>A área solicitante deve informar se o ativo terá <b>uso imediato</b>.</p>
+        <p>Se não estiver pronto para uso, informe a <b>data prevista</b> de início da operação.</p>
+        <p>Essa informação define o status do ativo e o início correto da depreciação. Atraso ou falta de atualização causam distorções contábeis, depreciação tardia e pontos de auditoria.</p></div></div>
+    </div>
+  </div>
+
+  <div class="bloco noite claro">
+    <div class="wrap fim-et">
+      <p class="req-info" id="req1"></p>
+      <button class="btn" data-concluir="1" disabled>Concluir etapa 1 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NA PRÁTICA (bloco 16, depois das 5 etapas) ============ -->
+<section class="bloco azul claro" id="pratica">
+  <div class="pontilhado"></div>
+  <div class="wrap">
+    <span class="badge">Depois das 5 etapas · prévia</span>
+    <h2 class="tit">O que você faria?</h2>
+    <div class="loc">
+      <div class="av"><img src="assets/APS22_M01_IMG-L01_Lia-Rosto.webp?v=1" alt=""></div>
+      <div><div class="cab2"><strong>Lia</strong><span class="tag-loc">LOC13 · decisão</span><button class="play">▶ áudio a gravar</button></div>
+      <p>Agora é com você. Em cada situação, pense: o que eu faria no lugar da Lia? Escolha uma opção e veja o que acontece.</p></div>
+    </div>
+    <div class="cena" id="cen">
+      <figure class="cena-img"><img src="assets/APS22_M01_IMG11-R03-C3_Assistencia.webp?v=1" alt="Pessoa entrega um notebook embalado a um técnico no balcão de uma assistência técnica"></figure>
+      <div class="balao">
+        <div class="rotulo">Cenário 1</div>
+        <p class="perg">O notebook de uma pessoa da sua equipe precisa ir para uma assistência técnica externa. O que fazer?</p>
+        <div class="ops"></div>
+        <div class="fb" hidden><h4></h4><p></p><div class="linha"><span class="tag-loc">LOC14 · feedback</span><button class="play">▶ áudio a gravar</button><button class="btn cont" id="cen-refazer" style="font-size:16px;padding:8px 18px" hidden>Tentar de novo</button></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fim">
+  <div class="pontilhado"></div>
+  <div class="wrap" style="position:relative">
+    <div class="trofeu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></div>
+    <h2 class="tit">Fim da amostra</h2>
+    <p>No curso completo, as etapas 2 a 5 seguem o mesmo padrão da etapa 1, e a jornada termina com os cenários, o quiz final de 5 questões e a conclusão.</p>
+  </div>
+</section>
+
+<footer><div class="wrap"><span>Apsen · Treinamentos de Contabilidade · Módulo 1</span><span>Amostra visual APS22 · rascunho para revisão</span></div></footer>
+
+
+<script>
+const $=(s,c=document)=>c.querySelector(s),$$=(s,c=document)=>[...c.querySelectorAll(s)];
+
+/* ===== Etapas do menu (divisão da direção, 19/11) ===== */
+const ETAPAS=[
+ {t:'O que é um ativo',a:'O conceito, a diferença entre ativo e despesa e quando a depreciação começa.',b:['4 Por que isso importa','5 Imobilizado × intangível','6 É ativo ou despesa?','7 Depreciação e amortização']},
+ {t:'Do pedido ao uso',a:'O caminho da compra até o bem entrar em operação.',b:['8 Aquisição de ativos (com o ServiceNow)','9 Ativos paralisados e imobilizado em andamento']},
+ {t:'Quem faz o quê',a:'O papel de cada área, inclusive o seu.',b:['10 Papéis e responsabilidades']},
+ {t:'Movimentações',a:'Como mudar o bem de lugar ou tirá-lo da empresa com a documentação certa.',b:['11 Transferências','12 Baixas']},
+ {t:'Controle no dia a dia',a:'Manter tudo em ordem, o impacto de um ativo mal gerido e o resumo dos hábitos.',b:['13 Inventário','14 Vídeo VID01','15 Faça e evite']}
+];
+const MONTADA=[true,false,false,false,false]; // na amostra, só a etapa 1 tem conteúdo
+const MSG=['Clique na etapa 1 para começar.','Etapa 1 concluída! A etapa 2 foi liberada.','Etapa 2 concluída!','Etapa 3 concluída!','Etapa 4 concluída!','Jornada concluída!'];
+
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target)}}),{threshold:.12});
+$$('.rv').forEach(el=>io.observe(el));
+addEventListener('scroll',()=>{const h=document.documentElement;$('#progresso').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
+
+/* estado */
+let feitos=0,sel=0;try{feitos=parseInt(localStorage.getItem('aps22-m01-amostra-v3')||'0',10)||0}catch(e){}
+const salva=()=>{try{localStorage.setItem('aps22-m01-amostra-v3',String(feitos))}catch(e){}};
+const estado=i=>i<feitos?'feito':i===feitos?'atual':'bloq';
+const icoCad='<svg viewBox="0 0 24 24" fill="none" stroke="#b8bdff" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+const icoOk='<svg viewBox="0 0 24 24" fill="none" stroke="#01F8FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+
+/* imagens das etapas: recortes da capa do roteiro IMG01-R02 (APS22-D14) */
+const IC=[
+ '<img src="assets/APS22_M01_IMG01-R02-E1_Ativo.webp?v=2" alt="Prédio da empresa com laboratório">',
+ '<img src="assets/APS22_M01_IMG01-R02-E2_Pedido.webp?v=2" alt="Notebook">',
+ '<img src="assets/APS22_M01_IMG01-R02-E3_Papeis.webp?v=2" alt="Mesa de trabalho com cadeira">',
+ '<img src="assets/APS22_M01_IMG01-R02-E4_Movimentacoes.webp?v=2" alt="Van com caixas">',
+ '<img src="assets/APS22_M01_IMG01-R02-E5_Controle.webp?v=2" alt="Prancheta com checklist e plaqueta de patrimônio">'];
+const onda=$('#onda');
+ETAPAS.forEach((e,i)=>{const b=document.createElement('button');b.className='passo';b.style.left=(10+20*i)+'%';b.dataset.i=i;
+  b.setAttribute('aria-label',`Etapa ${i+1}: ${e.t}`);b.innerHTML=`<span class="n">${i+1}</span><span class="ic">${IC[i]}</span><span class="st"></span>`;
+  b.onclick=()=>vaiPara(i);onda.append(b)});
+$('#textosEt').innerHTML=ETAPAS.map((e,i)=>`<button class="ptx" data-i="${i}"><span class="mini">${IC[i]}</span><span><h3>${i+1}. ${e.t}</h3><p>${e.a}</p><span class="rot"></span></span></button>`).join('');
+$('#textosEt').addEventListener('click',e=>{const b=e.target.closest('.ptx');if(b)vaiPara(+b.dataset.i)});
+let tToast;function avisa(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(tToast);tToast=setTimeout(()=>el.classList.remove('on'),2800)}
+
+function render(){
+  $$('.passo').forEach(h=>{const i=+h.dataset.i,s=estado(i);h.className='passo '+s;$('.st',h).innerHTML=s==='bloq'?icoCad:s==='feito'?icoOk:''});
+  $$('.ptx').forEach(b=>{const s=estado(+b.dataset.i);b.className='ptx '+s;$('.rot',b).textContent=s==='bloq'?'🔒 Bloqueada':s==='feito'?'✓ Concluída':'Disponível agora'});
+  $('#gLista').innerHTML=ETAPAS.map((m,i)=>{const s=estado(i);return `<button class="g-item ${s}" data-i="${i}"><span class="n">${i+1}</span><span><span class="t">${m.t}</span><span class="s">${s==='bloq'?'Bloqueada':s==='feito'?'Concluída ✓':'Disponível agora'}</span></span></button>`}).join('');
+  $('#gProg').textContent=feitos+' de 5';$('#anelNum').textContent=feitos+' de 5';
+  $('#anelArc').setAttribute('stroke-dasharray',(163.4*feitos/5)+' 200');
+  $('#miniProg').innerHTML=ETAPAS.map((_,i)=>`<i class="${i<feitos?'on':''}"></i>`).join('');
+  $('#menuMsg').textContent=MSG[Math.min(feitos,5)];
+  const b=$('[data-concluir="1"]');if(feitos>=1){b.disabled=true;b.firstChild.textContent='Etapa 1 concluída '}
+}
+function vaiPara(i){fechaG();const s=estado(i);
+  if(s==='bloq'){$('#menu').scrollIntoView({behavior:'smooth'});const p=$(`.passo[data-i="${i}"]`)||$(`.ptx[data-i="${i}"]`);p&&p.animate([{translate:'0'},{translate:'-7px'},{translate:'7px'},{translate:'0'}],{duration:320});avisa(`🔒 Conclua a etapa ${i} para liberar “${ETAPAS[i].t}”.`);return}
+  if(!MONTADA[i]){$('#menu').scrollIntoView({behavior:'smooth'});avisa(`“${ETAPAS[i].t}”: nesta amostra, só a etapa 1 está montada.`);return}
+  $('#et'+(i+1)).scrollIntoView({behavior:'smooth'})}
+$('#gLista').addEventListener('click',e=>{const b=e.target.closest('.g-item');if(b)vaiPara(+b.dataset.i)});
+const gav=$('#gaveta'),veu=$('#veu');function abreG(){gav.classList.add('on');veu.classList.add('on')}function fechaG(){gav.classList.remove('on');veu.classList.remove('on')}
+$('#abreMapa').onclick=abreG;$('#fechaMapa').onclick=fechaG;veu.onclick=fechaG;addEventListener('keydown',e=>{if(e.key==='Escape')fechaG()});
+$('#comecar').onclick=()=>$('#menu').scrollIntoView({behavior:'smooth'});
+$('#zerar').onclick=()=>{feitos=0;salva();REC.forEach(r=>r.ok=false);$$('.flip').forEach(f=>f.classList.remove('on'));montaDnd();montaCen();montaTl();atualizaRec();render();fechaG();scrollTo({top:0,behavior:'smooth'})};
+
+/* ===== Recursos da etapa 1 (libera o botão de concluir) ===== */
+const REC=[{k:'flip',t:'Cards',ok:false},{k:'carro',t:'Critérios',ok:false},{k:'dnd',t:'Atividade',ok:false},{k:'tl',t:'Linha do tempo',ok:false}];
+function marca(k){const r=REC.find(r=>r.k===k);if(r&&!r.ok){r.ok=true;atualizaRec()}}
+function atualizaRec(){
+  $('#recs').innerHTML=REC.map(r=>`<span class="${r.ok?'ok':''}"><i></i>${r.t}</span>`).join('');
+  const ok=REC.filter(r=>r.ok).length,p=$('#req1'),b=$('[data-concluir="1"]');
+  if(feitos>=1){p.textContent='Etapa concluída. Volte ao menu para seguir.';p.className='req-info pronto';return}
+  p.textContent=ok<REC.length?`Explore todos os recursos da etapa para concluí-la: ${ok} de ${REC.length} explorados.`:'Tudo explorado! Agora você pode concluir a etapa.';
+  p.className='req-info'+(ok===REC.length?' pronto':'');b.disabled=ok<REC.length;
+}
+$('[data-concluir="1"]').onclick=()=>{if(feitos<1){feitos=1;salva();render();atualizaRec();confete();avisa('🎉 Muito bem! Etapa 1 concluída. A etapa 2 já está liberada no menu.');setTimeout(()=>$('#menu').scrollIntoView({behavior:'smooth'}),700)}};
+
+/* flip cards */
+const viradas=new Set();
+$$('.flip').forEach((f,i)=>{const vira=()=>{f.classList.toggle('on');viradas.add(i);if(viradas.size===2)marca('flip')};f.onclick=vira;f.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();vira()}}});
+
+/* carrossel */
+$$('.carro').forEach(c=>{const tr=$('.trilho',c),n=tr.children.length,dots=$('.dots',c);let i=0;dots.innerHTML='<i></i>'.repeat(n);
+  const go=k=>{i=Math.max(0,Math.min(n-1,k));tr.style.transform=`translateX(-${i*100}%)`;$$('i',dots).forEach((d,j)=>d.classList.toggle('on',j===i));
+    $('[data-dir="-1"]',c).disabled=i===0;$('[data-dir="1"]',c).disabled=i===n-1;if(i===n-1)marca('carro')};
+  $$('.seta',c).forEach(b=>b.onclick=()=>go(i+ +b.dataset.dir));go(0)});
+
+/* arrastar e soltar */
+const ITENS=[['Notebook de R$ 4.800,00, usado por 4 anos','Ativo','Atende aos critérios de vida útil, valor e controle.'],
+ ['Mouse de R$ 90,00','Despesa','Está abaixo de R$ 1.200,00.'],
+ ['Cartucho de toner','Despesa','É material de consumo, sem vida útil maior que 1 ano.'],
+ ['Equipamento de laboratório de R$ 85.000,00','Ativo','Atende aos critérios de vida útil, valor e controle.'],
+ ['Cadeira de escritório de R$ 950,00','Despesa','Apesar de durável, está abaixo de R$ 1.200,00.']];
+const dnd=$('#dnd'),banco=$('.banco',dnd);let pega=null;
+function montaDnd(){banco.innerHTML='';$$('.col',dnd).forEach(c=>{$$('.item',c).forEach(x=>x.remove());$('.vazio',c).hidden=false});
+  $('.resul',dnd).hidden=true;$('#dnd-reset').hidden=true;
+  [3,1,0,4,2].forEach(k=>{const b=document.createElement('button');b.className='item';b.draggable=true;b.dataset.k=k;b.textContent=ITENS[k][0];banco.append(b);
+    b.ondragstart=e=>{e.dataTransfer.setData('text',k);pega=b};
+    b.onclick=()=>{if(b.closest('.col'))return;$$('.item.sel',dnd).forEach(x=>x!==b&&x.classList.remove('sel'));b.classList.toggle('sel');pega=b.classList.contains('sel')?b:null}})}
+function solta(col,b){const [t,r,f]=ITENS[b.dataset.k],ok=r===col.dataset.col;
+  b.classList.remove('sel');b.classList.add(ok?'ok':'no');b.draggable=false;b.disabled=true;
+  b.innerHTML=`${ok?'✓':'✕'} ${t}<small>${ok?'':'A resposta é '+r.toLowerCase()+'. '}${f}</small>`;$('.vazio',col).hidden=true;col.append(b);pega=null;
+  if(!banco.children.length){const a=$$('.item.ok',dnd).length,res=$('.resul',dnd);
+    res.textContent=`Você acertou ${a} de ${ITENS.length}. ${a===ITENS.length?'Ótimo: você aplicou os três critérios.':'Revise os critérios e tente de novo, se quiser.'}`;
+    res.hidden=false;$('#dnd-reset').hidden=false;marca('dnd');if(a===ITENS.length)confete()}}
+$$('.col',dnd).forEach(c=>{c.ondragover=e=>{e.preventDefault();c.classList.add('alvo')};c.ondragleave=()=>c.classList.remove('alvo');
+  c.ondrop=e=>{e.preventDefault();c.classList.remove('alvo');if(pega)solta(c,pega)};c.onclick=()=>{if(pega&&!pega.closest('.col'))solta(c,pega)}});
+$('#dnd-reset').onclick=montaDnd;
+
+/* linha do tempo com as imagens do roteiro (IMG07) */
+const TL=[['Aquisição','A área solicita a compra e informa a vida útil estimada e a data prevista para o início de uso.'],
+ ['Chegada e identificação','O bem chega e a área avisa a Contabilidade para colocar a plaqueta de identificação patrimonial.'],
+ ['Pronto para uso','Instalado e em condições de operar: a depreciação ou amortização começa aqui.'],
+ ['Uso ao longo da vida útil','O valor do bem é reconhecido mês a mês no resultado.'],
+ ['Baixa','O bem deixa de ser usado ou de pertencer à Apsen e sai dos registros.']];
+const tl=$('#tl'),vistas=new Set();
+function montaTl(){$$('.et',tl).forEach(x=>x.remove());vistas.clear();
+  TL.forEach(([t],i)=>{const b=document.createElement('button');b.className='et';b.innerHTML=`${i===2?'<span class="fogo">Começa aqui</span>':''}<img src="assets/APS22_M01_IMG07-R02-E${i+1}.webp?v=1" alt=""><span><em>${i+1}.</em> ${t}</span>`;b.onclick=()=>etapaTl(i);tl.append(b)});etapaTl(0,true)}
+function etapaTl(i,inicio){if(!inicio)vistas.add(i);else vistas.add(0);
+  $$('.et',tl).forEach((b,j)=>{b.classList.toggle('on',j===i);b.classList.toggle('vista',vistas.has(j))});
+  $('.barra',tl).style.width=(i*23)+'%';
+  $('#painelEt .n').textContent=i+1;$('#painelEt h3').textContent=TL[i][0];$('#painelEt p').textContent=TL[i][1];
+  if(vistas.size===TL.length)marca('tl')}
+
+/* cenário */
+const OPS=['Embalar e enviar logo, para não atrasar o conserto.','Acionar TI, preencher o formulário e solicitar ao Fiscal a nota fiscal de remessa para conserto.','Avisar a Contabilidade só quando o notebook voltar.'],CERTA=1,
+ FB='Todo envio para terceiros exige formulário e nota fiscal. No caso de equipamentos de informática, a TI faz a gestão da movimentação.';
+function montaCen(){const box=$('#cen .ops');box.innerHTML='';$('#cen .fb').hidden=true;
+  OPS.forEach((t,k)=>{const b=document.createElement('button');b.className='op';b.innerHTML=`<span class="l">${'ABC'[k]}</span><span>${t}</span>`;b.onclick=()=>responde(k);box.append(b)})}
+function responde(k){const ok=k===CERTA,bs=$$('#cen .op');bs.forEach(b=>b.disabled=true);bs[k].classList.add(ok?'certa':'errada');
+  const fb=$('#cen .fb');fb.hidden=false;fb.className='fb '+(ok?'pos':'neg');$('h4',fb).textContent=ok?'Isso mesmo!':'Não é bem assim.';$('p',fb).textContent=FB;$('#cen-refazer').hidden=ok;if(ok)confete()}
+$('#cen-refazer').onclick=montaCen;
+
+
+/* confete */
+function confete(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const c=document.createElement('div');c.className='confete';
+  const cores=['#01F8FF','#0B13B6','#015DD6','#FFC23D','#ffffff'];
+  for(let i=0;i<70;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'%';p.style.background=cores[i%5];p.style.animationDelay=Math.random()*.6+'s';p.style.animationDuration=1.6+Math.random()*1.4+'s';c.append(p)}
+  document.body.append(c);setTimeout(()=>c.remove(),3500)}
+
+/* locução: só indicação */
+document.addEventListener('click',e=>{const p=e.target.closest('.play');if(!p)return;const o=p.textContent;p.textContent='Locução ainda não gravada (voz a escolher)';setTimeout(()=>p.textContent=o,2200)});
+
+if(feitos>=1)REC.forEach(r=>r.ok=true);
+montaDnd();montaCen();montaTl();atualizaRec();render();
+</script>
+</body>
+</html>
